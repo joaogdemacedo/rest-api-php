@@ -1,0 +1,1 @@
+{"version":1,"defects":{"App\\Tests\\FacilityTest::testShouldCreateFacilityWithSuccess":3,"App\\Tests\\FacilityTest::testShouldUpdateFacilityWithSuccess":4},"times":{"App\\Tests\\FacilityTest::testShouldCreateFacilityWithSuccess":0.042,"App\\Tests\\FacilityTest::testShouldUpdateFacilityWithSuccess":0.031}}
