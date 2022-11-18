@@ -1,12 +1,12 @@
 # REST API in PHP - João De Macedo
 #### DTT BACKEND ASSESSMENT
 
-### What Is This?
+### What is this?
 
 This is a `REST API` made in `PHP` that stores and retrieves information about catering facilities. `MySQL` is used for storage of the data and both the request body and response data are in `JSON format`.
 This API has `CRUD` implemented and other functionalities such as `search criteria` - _allowing partial matches_ -, `cursor pagination`, `JWT authentication` and `integration tests`.
 
-### Structure `App/` 
+### Structure `Assessment_Setup/App/` 
 
 - `Controllers`: Handle incoming requests and sends the response data back to the client.
 - `Entities`: Objects that correspond to the tables in the database.
