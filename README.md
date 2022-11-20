@@ -15,7 +15,8 @@ This API has `CRUD` implemented and other functionalities such as `search criter
 - `Services`: Layer capable of managing data from Controllers and comunicating to Repositories.
 - `Utils`: This folder contains a class named `PaginationParser`to get Query Parameters in order to allow searching with simultaneous filters and pagination. 
 - `Tests`: Integration Tests to validate the API codebase.
-- 
+
+
 #### Other Files
 
 - `HourLog.pdf` : File containg how much time I needed to build this API and more details about the development.
