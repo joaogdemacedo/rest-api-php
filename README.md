@@ -25,6 +25,9 @@ This API has `CRUD` implemented and other functionalities such as `search criter
 ### User Storys
 
 - Database created with 5 tables:
+
+![Alt text](/schemaDatabase.png?raw=true "Optional Title")
+
   - `facility`: store each Facility.
   - `location`: store each Location of each Facility.
   - `employees`: store each Employee of Facilities 
