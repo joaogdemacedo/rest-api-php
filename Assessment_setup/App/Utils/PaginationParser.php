@@ -4,6 +4,9 @@ namespace App\Utils;
 
 class PaginationParser
 {
+    // Object used in List Facilities in order to store filters values
+    // Cursor Pagination included (nextCursor and limit)
+
     private int $nextCursor;
     private int $limit;
     private string $facilityName;

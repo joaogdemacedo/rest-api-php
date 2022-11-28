@@ -6,31 +6,36 @@ use App\Entities\Facility;
 use App\Entities\Location;
 use App\Exceptions\FacilityAlreadyExistsException;
 use App\Exceptions\FacilityNotFoundException;
-use App\Exceptions\FacilityTagNotLinkedException;
+use App\Exceptions\FacilityTagAlreadyLinkedException;
 use App\Exceptions\LocationNotFoundException;
 use App\Exceptions\TagNotFoundException;
 use App\Exceptions\UpdateFailedException;
+use App\Plugins\Db\Connection\Mysql;
+use App\Plugins\Db\Db;
 use App\Plugins\Http\Exceptions\Conflict;
 use App\Plugins\Http\Exceptions\NotFound;
 use App\Repositories\FacilityRepository;
 use App\Repositories\LocationRepository;
 use App\Repositories\TagRepository;
 use App\Utils\PaginationParser;
+use DateTime;
 
 class FacilityService
 {
     private FacilityRepository $facilityRepository;
     private TagRepository $tagRepository;
     private LocationRepository $locationRepository;
+    private Db $db;
 
-    public function __construct()
+    public function __construct(Db $db)
     {
-        $this->facilityRepository = new FacilityRepository();
-        $this->tagRepository = new TagRepository();
-        $this->locationRepository = new LocationRepository();
+        $this->db = $db;
+        $this->facilityRepository = new FacilityRepository($this->db);
+        $this->tagRepository = new TagRepository($this->db);
+        $this->locationRepository = new LocationRepository($this->db);
     }
 
-
+    // Get a Facility and its Tags with its ID
     public function getFacility(int $id): Facility
     {
         try {
@@ -43,125 +48,9 @@ class FacilityService
     }
 
 
-    public function listFacilities(): array
-    {
-        $paginationParser = new PaginationParser(
-            !empty($_GET['nextcursor']) ? $_GET['nextcursor'] : 1,
-            !empty($_GET['limit']) ? $_GET['limit'] : 10,
-            '',
-            '',
-            ''
-        );
-        try {
-            $facilities = $this->facilityRepository->listFacilities($paginationParser->getNextCursor(), $paginationParser->getLimit()+1);
-        } catch (FacilityNotFoundException $exception) {
-            throw new NotFound(['message' => 'Unable to find Facilities.']);
-        }
-        foreach ($facilities["facilities"] as $facility){
-            $facility->setTags($this->tagRepository->getTagsByFacilityId($facility->getId()));
-        }
-        return $facilities;
-    }
-
-
-    public function searchFacilityByName(string $facilityName, int $nextCursor, int $limit): array
-    {
-        try {
-            $facilities = $this->facilityRepository->getFacilityByName($facilityName, $nextCursor, $limit);
-        } catch (FacilityNotFoundException $exception) {
-            throw new Conflict(['message' => 'There are no Facilities with the respective Name pattern.']);
-        }
-        foreach ($facilities["facilities"] as $facility){
-            $facility->setTags($this->tagRepository->getTagsByFacilityId($facility->getId()));
-        }
-        return $facilities;
-    }
-
-
-    public function searchFacilityByTagName(string $tagName, int $nextCursor, int $limit): array
-    {
-        try {
-            $facilities = $this->facilityRepository->getFacilitiesByTagName($tagName, $nextCursor, $limit+1);
-        } catch (FacilityNotFoundException $exception){
-            throw new Conflict(['message' => 'There are no Facilities with the respective Tag pattern.']);
-        }
-        foreach ($facilities["facilities"] as $facility){
-            $facility->setTags($this->tagRepository->getTagsByFacilityId($facility->getId()));
-        }
-        return $facilities;
-    }
-
-
-    public function searchFacilityByCity(string $city, int $nextCursor, int $limit): array
-    {
-        try {
-            $facilities = $this->facilityRepository->getFacilitiesByCity($city, $nextCursor, $limit+1);
-        } catch (FacilityNotFoundException $exception){
-            throw new Conflict(['message' => 'There are no Facilities with the respective City pattern.']);
-        }
-        foreach ($facilities["facilities"] as $facility){
-            $facility->setTags($this->tagRepository->getTagsByFacilityId($facility->getId()));
-        }
-        return $facilities;
-    }
-
-
-    public function searchFacilityByNameTagAndCity(string $facilityName, string $tagName, string $city, int $nextCursor, int $limit): array
-    {
-        try {
-            $facilities = $this->facilityRepository->getFacilitiesByNameTagAndCity($facilityName, $tagName, $city, $nextCursor, $limit);
-        } catch (FacilityNotFoundException $exception) {
-            throw new Conflict(['message' => 'There are no Facilities with the respective patterns.']);
-        }
-        foreach ($facilities["facilities"] as $facility){
-            $facility->setTags($this->tagRepository->getTagsByFacilityId($facility->getId()));
-        }
-        return $facilities;
-    }
-
-
-    public function searchFacilityByNameAndTag(string $facilityName, string $tagName, int $nextCursor, int $limit): array
-    {
-        try {
-            $facilities = $this->facilityRepository->getFacilitiesByNameAndTag($facilityName, $tagName, $nextCursor, $limit);
-        } catch (FacilityNotFoundException $exception) {
-            throw new Conflict(['message' => 'There are no Facilities with the respective patterns.']);
-        }
-        foreach ($facilities["facilities"] as $facility){
-            $facility->setTags($this->tagRepository->getTagsByFacilityId($facility->getId()));
-        }
-        return $facilities;
-    }
-
-
-    public function searchFacilityByNameAndCity(string $facilityName, string $city, int $nextCursor, int $limit): array
-    {
-        try {
-            $facilities = $this->facilityRepository->getFacilitiesByNameAndCity($facilityName, $city, $nextCursor, $limit);
-        } catch (FacilityNotFoundException $exception) {
-            throw new Conflict(['message' => 'There are no Facilities with the respective patterns.']);
-        }
-        foreach ($facilities["facilities"] as $facility){
-            $facility->setTags($this->tagRepository->getTagsByFacilityId($facility->getId()));
-        }
-        return $facilities;
-    }
-
-
-    public function searchFacilityByTagAndCity(string $tagName, string $city, int $nextCursor, int $limit): array
-    {
-        try {
-            $facilities = $this->facilityRepository->getFacilitiesByTagAndCity($tagName, $city, $nextCursor, $limit);
-        } catch (FacilityNotFoundException $exception) {
-            throw new Conflict(['message' => 'There are no Facilities with the respective patterns.']);
-        }
-        foreach ($facilities["facilities"] as $facility){
-            $facility->setTags($this->tagRepository->getTagsByFacilityId($facility->getId()));
-        }
-        return $facilities;
-    }
-
-
+    // Create Facility and link Tags as well
+    // Transactions are needed here because data is inserted in facility and facility_tag tables
+    // If something goes wrong, nothing is inserted.
     public function createFacility(array $requestPayload): Facility
     {
         /** @var string $facilityName */
@@ -170,20 +59,32 @@ class FacilityService
         /** @var int $locationid */
         $locationId = $requestPayload['location_id'];
 
+        $this->db->beginTransaction();
         try {
             $location = $this->locationRepository->getLocation($locationId);
             $facility = $this->facilityRepository->createFacility($facilityName,$location);
+            $facilityWithTags = $this->addTags($facility->getId(), $requestPayload);
+            $this->db->commit();
+            return $facilityWithTags;
         } catch (LocationNotFoundException $exception){
+            $this->db->rollBack();
             throw new NotFound(['message' => 'Unable to find this Location.']);
         } catch (FacilityAlreadyExistsException $exception){
+            $this->db->rollBack();
             throw new Conflict(['message' => 'Facility already exists.']);
+        } catch (Conflict $exception) {
+            $this->db->rollBack();
+            throw new Conflict(['message' => 'Unable to link same Tag multiple times.']);
+        } catch (NotFound $exception){
+            $this->db->rollBack();
+            throw new NotFound(['message' => 'Unable to find Tag or Tags.']);
         }
-
-        return $facility;
 
     }
 
 
+    // Add existing Tags to a Facility
+    // e.g., add an entry to facility_tag table with Facility and Tag ids
     public function addTags(int $id, array $requestPayload): Facility
     {
         $tagNames = $requestPayload['tag_names'];
@@ -195,16 +96,19 @@ class FacilityService
         foreach ($tagNames as $tagName){
             try {
                 $tag = $this->tagRepository->getTagByName($tagName['name']);
-            } catch (TagNotFoundException $e) {
-                throw new NotFound(['message' => 'Unable to find Tag/s.']);
+                $this->facilityRepository->createFacilityTagLink($id, $tag->getId());
+            } catch (TagNotFoundException $exception) {
+                throw new NotFound(['message' => 'Unable to find Tag or Tags.']);
+            } catch (FacilityTagAlreadyLinkedException $exception){
+                throw new Conflict(['message' => 'Tag already linked to this facility.']);
             }
-            $this->facilityRepository->createFacilityTagLink($id, $tag->getId());
         }
         $facility->setTags($this->tagRepository->getTagsByFacilityId($id));
         return $facility;
     }
 
-
+    // Change current name or location of a Facility
+    // To update Tags of a Facility, deleteTag or addTags are used
     public function updateFacility(int $id, array $requestPayload): Facility
     {
         $facilityId = $id;
@@ -232,16 +136,14 @@ class FacilityService
         return $facility;
     }
 
-
+    // Delete a Facility and remove its linked Tags and Employees
     public function deleteFacility(int $id): Facility
     {
-
         try {
             $facility = $this->facilityRepository->getFacility($id);
         } catch (FacilityNotFoundException $exception) {
             throw new NotFound(['message' => 'Unable to find this Facility.']);
         }
-
         // Database has ON DELETE CASCADE on facility_id column (facility_tag and employees tables)
         // Thus, it is not needed to perform a transaction to delete all relationships
         // with this facility.
@@ -251,7 +153,8 @@ class FacilityService
         return $facility;
     }
 
-
+    // Delete a relationship of a Facility and one Tag
+    // e.g. remove from facility_tag with Facility and Tag IDs
     public function deleteTag(int $id, int $tagId): Facility
     {
         try {
@@ -262,7 +165,7 @@ class FacilityService
             throw new NotFound(['message' => 'Unable to find this Facility.']);
         } catch (TagNotFoundException $exception) {
             throw new NotFound(['message' => 'Unable to find this Tag.']);
-        } catch (FacilityTagNotLinkedException $e) {
+        } catch (FacilityTagAlreadyLinkedException $e) {
             throw new NotFound(['message' => 'This Tag is not linked with this Facility.']);
         }
         $this->facilityRepository->deleteFacilityTagLink($id, $tagId);
@@ -271,58 +174,52 @@ class FacilityService
     }
 
 
-    public function paginationParser(): array
+    // List Facilities with cursor pagination and search criteria included
+    // paginationParser Object used to store filter values (e.g. Facility name, Tag name, Location City)
+    // nextCursor and limit with default values in case of not specified
+    public function listFacilities(): array
     {
         $paginationParser = new PaginationParser(
             !empty($_GET['nextcursor']) ? $_GET['nextcursor'] : 1,
-            !empty($_GET['limit']) ? $_GET['limit'] : 10,
+            !empty($_GET['limit']) ? $_GET['limit'] + 1 : 11, // plus one in order to get the id of 'nextCursor', e.g., id of the next Facility
             !empty($_GET['facilityname']) ? $_GET['facilityname'] : '',
             !empty($_GET['tagname']) ? $_GET['tagname'] : '',
             !empty($_GET['locationcity']) ? $_GET['locationcity'] : ''
         );
-
-        $nextCursor = $paginationParser->getNextCursor();
-        $limit = $paginationParser->getLimit() + 1;
-
-        // This if else statement checks all the possibles combinations within the parameters received
-        if ($facilityName = $paginationParser->getFacilityName()){
-            if ($tagName = $paginationParser->getTagName()){
-                if ($city = $paginationParser->getLocationCity()){
-                    // Facility name, Tag name and City
-                    $facilities = $this->searchFacilityByNameTagAndCity($facilityName, $tagName, $city, $nextCursor, $limit);
-                } else {
-                    // Facility name and Tag name
-                    $facilities = $this->searchFacilityByNameAndTag($facilityName, $tagName, $nextCursor, $limit);
-                }
-            } elseif ($city = $paginationParser->getLocationCity()) {
-                // Facility name and City
-                $facilities = $this->searchFacilityByNameAndCity($facilityName, $city, $nextCursor, $limit);
-
-            } else {
-                // Facility name only
-                $facilities = $this->searchFacilityByName($facilityName, $nextCursor, $limit);
-            }
+        try {
+            $results = $this->facilityRepository->listFacilities($paginationParser);
+        } catch (FacilityNotFoundException $exception){
+            throw new NotFound(['message' => 'Unable to find Facilities with such filters.']);
         }
-        elseif ($tagName = $paginationParser->getTagName()) {
-            if ($city = $paginationParser->getLocationCity()){
-                // Tag name and City
-                $facilities = $this->searchFacilityByTagAndCity($tagName, $city, $nextCursor, $limit);
-
-            } else {
-                // Tag name only
-                $facilities = $this->searchFacilityByTagName($tagName, $nextCursor, $limit);
-            }
+        $facilities = [];
+        foreach ($results as $result){
+            $location = new Location(
+                intval($result['location_id']),
+                $result['location_city'],
+                '',
+                '',
+                '' ,
+                ''
+            );
+            $facilities[]= new Facility(
+                intval($result['id']),
+                $result['name'],
+                new DateTime($result['created_at']),
+                $location,
+                $this->tagRepository->getTagsByFacilityId(intval($result['id']))
+            );
         }
-        elseif ($city = $paginationParser->getLocationCity()){
-            // City only
-            $facilities = $this->searchFacilityByCity($city, $nextCursor, $limit);
+        if (count($results)<$paginationParser->getLimit()){
+            // It means that is the last page of results
+            $nextCursor = null;
+        } else {
+            $lastFacility = array_pop($facilities);
+            $nextCursor = $lastFacility->getId();
         }
-        else {
-            //It did not get any query parameter (however, it never gets here due to a check in FacilityController).
-            throw new Conflict(['message' => 'Query parameters needed.']);
-        }
-        return $facilities;
+        return [
+            "facilities" => $facilities,
+            "nextCursor" => $nextCursor
+        ];
     }
-
 
 }

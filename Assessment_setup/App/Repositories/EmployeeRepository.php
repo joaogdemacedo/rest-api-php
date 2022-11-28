@@ -5,25 +5,22 @@ namespace App\Repositories;
 use App\Entities\Employee;
 use App\Exceptions\EmployeeAlreadyExistsException;
 use App\Exceptions\EmployeeNotFoundException;
-use App\Plugins\Db\Connection\Mysql;
 use App\Plugins\Db\Db;
 
 class EmployeeRepository
 {
-
     private Db $db;
 
-    public function __construct()
+    public function __construct(Db $db)
     {
-        $connection = new Mysql('127.0.0.1:8889','catering_facilities','root','root');
-        $this->db = new Db($connection);
+        $this->db = $db;
     }
 
 
     public function getEmployeeByUsername(string $username): Employee
     {
         $sqlGetEmployee = '
-            SELECT * FROM employees AS emp
+            SELECT * FROM employee AS emp
             WHERE emp.username = :username';
 
         $this->db->executeQuery($sqlGetEmployee, [
@@ -46,7 +43,7 @@ class EmployeeRepository
     public function getEmployeeById(int $id): Employee
     {
         $sqlGetEmployee = '
-            SELECT * FROM employees AS emp
+            SELECT * FROM employee AS emp
             WHERE emp.id = :id';
 
         $this->db->executeQuery($sqlGetEmployee, [
@@ -69,7 +66,7 @@ class EmployeeRepository
     public function createEmployee(string $username, string $password, int $facilityId): Employee
     {
         $sqlCreateEmployee = '
-            INSERT INTO employees (id, username, password, facility_id) 
+            INSERT INTO employee (id, username, password, facility_id) 
             VALUES (
                     NULL, 
                     :username, 
@@ -97,7 +94,7 @@ class EmployeeRepository
     public function listEmployees(): array
     {
         $sqlListEmployees = '
-            SELECT * FROM employees';
+            SELECT * FROM employee';
 
         $this->db->executeQuery($sqlListEmployees);
         $results = $this->db->getStatement()->fetchAll();
@@ -119,7 +116,7 @@ class EmployeeRepository
     public function updateEmployee(int $id, string $username, int $facilityId): Employee
     {
         $sqlUpdateEmployee = '
-            UPDATE employees
+            UPDATE employee
             SET username= :username, facility_id = :facilityId
             WHERE id = :id';
 
@@ -142,7 +139,7 @@ class EmployeeRepository
     public function deleteEmployee(int $id)
     {
         $sqlDeleteEmployee = '
-            DELETE FROM employees
+            DELETE FROM employee
             WHERE id = :id';
 
         $this->db->executeQuery($sqlDeleteEmployee, ['id'=>$id]);

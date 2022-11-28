@@ -2,13 +2,10 @@
 
 namespace App\Controllers;
 
-use App\Plugins\Http\Exceptions\BadRequest;
-use App\Plugins\Http\Exceptions\Conflict;
-use App\Plugins\Http\Exceptions\NotFound;
-use App\Plugins\Http\Exceptions\Unauthorized;
 use App\Plugins\Http\Response\Created;
 use App\Services\AuthenticationService;
-use App\Services\tagService;
+use App\Services\TagService;
+use App\Utils\Utils;
 
 class TagController extends AuthenticationController
 {
@@ -17,8 +14,9 @@ class TagController extends AuthenticationController
 
     public function __construct()
     {
-        $this->tagService = new TagService();
-        $this->authenticationService = new AuthenticationService();
+        $dbConnection = Utils::getDbConnection();
+        $this->tagService = new TagService($dbConnection);
+        $this->authenticationService = new AuthenticationService($dbConnection);
     }
 
 
@@ -26,10 +24,7 @@ class TagController extends AuthenticationController
     {
         $employeeId = $this->authenticationService->validateToken();
 
-        $getBody = file_get_contents('php://input');
-        $decodeJson = json_decode($getBody, true);
-
-        $tag = $this->tagService->createTag($decodeJson);
+        $tag = $this->tagService->createTag(Utils::getDecodeJson());
         return (new Created($tag))->send();
     }
 

@@ -6,6 +6,8 @@ use App\Entities\Employee;
 use App\Exceptions\EmployeeAlreadyExistsException;
 use App\Exceptions\EmployeeNotFoundException;
 use App\Exceptions\FacilityNotFoundException;
+use App\Plugins\Db\Connection\Mysql;
+use App\Plugins\Db\Db;
 use App\Plugins\Http\Exceptions\Conflict;
 use App\Plugins\Http\Exceptions\NotFound;
 use App\Repositories\EmployeeRepository;
@@ -15,14 +17,17 @@ class EmployeeService
 {
     private EmployeeRepository $employeeRepository;
     private FacilityRepository $facilityRepository;
+    private Db $db;
 
-    public function __construct()
+    public function __construct(Db $db)
     {
-        $this->employeeRepository = new EmployeeRepository();
-        $this->facilityRepository = new FacilityRepository();
+        $this->db = $db;
+        $this->employeeRepository = new EmployeeRepository($this->db);
+        $this->facilityRepository = new FacilityRepository($this->db);
     }
 
-
+    // Create Employee with username and password
+    // password_hash used to store passwords safely
     public function createEmployee(array $requestPayload): Employee
     {
         /** @var string $username */
@@ -70,6 +75,7 @@ class EmployeeService
     }
 
 
+    // Change current username or facility_id of an Employee
     public function updateEmployee(int $id, array $requestPayload): Employee
     {
         $username = $requestPayload['username'];

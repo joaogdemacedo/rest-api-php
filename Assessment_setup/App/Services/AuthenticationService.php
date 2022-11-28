@@ -3,6 +3,8 @@
 namespace App\Services;
 
 use App\Exceptions\EmployeeNotFoundException;
+use App\Plugins\Db\Connection\Mysql;
+use App\Plugins\Db\Db;
 use App\Plugins\Http\Exceptions\BadRequest;
 use App\Plugins\Http\Exceptions\NotFound;
 use App\Plugins\Http\Exceptions\Unauthorized;
@@ -17,13 +19,16 @@ class AuthenticationService
     // A secret key should be placed as an environment variable
     private string $secretKey = 'bGS6lzFqvvSQ8ALbOxatm7/Vk7mLQyzqaS34Q4oR1ew=';
     private EmployeeRepository $employeeRepository;
+    private Db $db;
 
-    public function __construct()
+    public function __construct(Db $db)
     {
-        $this->employeeRepository = new EmployeeRepository();
+        $this->db = $db;
+        $this->employeeRepository = new EmployeeRepository($this->db);
     }
 
 
+    // Authentication with basic JWT implementation
     public function authenticate(array $requestPayload): string
     {
         $username = $requestPayload['username'];
@@ -40,6 +45,7 @@ class AuthenticationService
         }
 
         $issuedAt = new DateTimeImmutable();
+        // Token valid during 1 day in testing mode
         $expire = $issuedAt->modify('+1 day')->getTimestamp();
         $username = $employee->getUsername();
 
@@ -72,7 +78,7 @@ class AuthenticationService
             } catch (ExpiredException $exception){
                 throw new Unauthorized(['message' => 'Token has expired.']);
             }
-            // Returning the ID, allows to know who made each request.
+            // Returning the Employee ID, allowing to know who made each request.
             $data = (array) $token;
             return $data['id'];
         }

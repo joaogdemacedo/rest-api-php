@@ -5,18 +5,15 @@ namespace App\Repositories;
 use App\Entities\Tag;
 use App\Exceptions\TagAlreadyExistsException;
 use App\Exceptions\TagNotFoundException;
-use App\Plugins\Db\Connection\Mysql;
 use App\Plugins\Db\Db;
 
 class TagRepository
 {
-
     private Db $db;
 
-    public function __construct()
+    public function __construct(Db $db)
     {
-        $connection = new Mysql('127.0.0.1:8889','catering_facilities','root','root');
-        $this->db = new Db($connection);
+        $this->db = $db;
     }
 
 

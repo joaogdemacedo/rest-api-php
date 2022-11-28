@@ -10,6 +10,18 @@
 			"item": [
 				{
 					"name": "Authentication",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"pm.environment.set(\"token\", jsonData[\"token\"]);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"auth": {
 							"type": "noauth"
@@ -18,7 +30,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"username\" : \"intruso\",\n    \"password\" : \"joao\"\n}",
+							"raw": "{\n    \"username\" : \"jackass\",\n    \"password\" : \"jackass\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -26,14 +38,11 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:8888/Assessment_setup/api/auth",
-							"protocol": "http",
+							"raw": "{{base_url}}/api/auth",
 							"host": [
-								"localhost"
+								"{{base_url}}"
 							],
-							"port": "8888",
 							"path": [
-								"Assessment_setup",
 								"api",
 								"auth"
 							]
@@ -62,14 +71,11 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:8888/Assessment_setup/api/tags",
-							"protocol": "http",
+							"raw": "{{base_url}}/api/tags",
 							"host": [
-								"localhost"
+								"{{base_url}}"
 							],
-							"port": "8888",
 							"path": [
-								"Assessment_setup",
 								"api",
 								"tags"
 							]
@@ -94,7 +100,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"name\": \"tagultima\"\n}",
+							"raw": "{\n    \"name\": \"last tag\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -102,14 +108,11 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:8888/Assessment_setup/api/tags",
-							"protocol": "http",
+							"raw": "{{base_url}}/api/tags",
 							"host": [
-								"localhost"
+								"{{base_url}}"
 							],
-							"port": "8888",
 							"path": [
-								"Assessment_setup",
 								"api",
 								"tags"
 							]
@@ -138,14 +141,11 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:8888/Assessment_setup/api/facilities/",
-							"protocol": "http",
+							"raw": "{{base_url}}/api/facilities/",
 							"host": [
-								"localhost"
+								"{{base_url}}"
 							],
-							"port": "8888",
 							"path": [
-								"Assessment_setup",
 								"api",
 								"facilities",
 								""
@@ -153,31 +153,31 @@
 							"query": [
 								{
 									"key": "tagname",
-									"value": "ultima",
+									"value": "tag",
 									"description": "Partial match of Tag",
 									"disabled": true
 								},
 								{
 									"key": "locationcity",
-									"value": "1",
+									"value": "3",
 									"description": "Partial match of City",
 									"disabled": true
 								},
 								{
 									"key": "facilityname",
-									"value": "facility155",
+									"value": "name",
 									"description": "Partial match of Facility name",
 									"disabled": true
 								},
 								{
 									"key": "nextcursor",
-									"value": "32",
+									"value": "1",
 									"description": "Cursor for Pagination",
 									"disabled": true
 								},
 								{
 									"key": "limit",
-									"value": "200",
+									"value": "2",
 									"description": "Number of results user wants per page",
 									"disabled": true
 								}
@@ -214,17 +214,14 @@
 							}
 						],
 						"url": {
-							"raw": "http://localhost:8888/Assessment_setup/api/facilities/155",
-							"protocol": "http",
+							"raw": "{{base_url}}/api/facilities/159",
 							"host": [
-								"localhost"
+								"{{base_url}}"
 							],
-							"port": "8888",
 							"path": [
-								"Assessment_setup",
 								"api",
 								"facilities",
-								"155"
+								"159"
 							]
 						}
 					},
@@ -253,7 +250,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"name\": \"facility155\",\n    \"location_id\": \"1\"\n}",
+							"raw": "{\n    \"name\": \"last facility\",\n    \"location_id\": \"2\",\n    \"tag_names\": [\n                {\n                    \"name\": \"tag1\"\n                },\n                {\n                    \"name\": \"tag2\"\n                }\n            ]\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -261,14 +258,11 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:8888/Assessment_setup/api/facilities",
-							"protocol": "http",
+							"raw": "{{base_url}}/api/facilities",
 							"host": [
-								"localhost"
+								"{{base_url}}"
 							],
-							"port": "8888",
 							"path": [
-								"Assessment_setup",
 								"api",
 								"facilities"
 							]
@@ -299,7 +293,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"tag_names\": [\n                {\n                    \"name\": \"tag3\"\n                },\n                {\n                    \"name\": \"tag2\"\n                }\n            ]\n}",
+							"raw": "{\n    \"tag_names\": [\n                {\n                    \"name\": \"tag3\"\n                },\n                {\n                    \"name\": \"tagAI\"\n                }\n            ]\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -307,17 +301,14 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:8888/Assessment_setup/api/facilities/159/tags",
-							"protocol": "http",
+							"raw": "{{base_url}}/api/facilities/194/tags",
 							"host": [
-								"localhost"
+								"{{base_url}}"
 							],
-							"port": "8888",
 							"path": [
-								"Assessment_setup",
 								"api",
 								"facilities",
-								"159",
+								"194",
 								"tags"
 							]
 						}
@@ -355,14 +346,11 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:8888/Assessment_setup/api/facilities/1",
-							"protocol": "http",
+							"raw": "{{base_url}}/api/facilities/1",
 							"host": [
-								"localhost"
+								"{{base_url}}"
 							],
-							"port": "8888",
 							"path": [
-								"Assessment_setup",
 								"api",
 								"facilities",
 								"1"
@@ -374,6 +362,16 @@
 				{
 					"name": "Delete Facility",
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "DELETE",
 						"header": [
 							{
@@ -382,26 +380,15 @@
 								"type": "default"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"id\": 47\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
 						"url": {
-							"raw": "http://localhost:8888/Assessment_setup/api/facilities",
-							"protocol": "http",
+							"raw": "{{base_url}}/api/facilities/194",
 							"host": [
-								"localhost"
+								"{{base_url}}"
 							],
-							"port": "8888",
 							"path": [
-								"Assessment_setup",
 								"api",
-								"facilities"
+								"facilities",
+								"194"
 							]
 						}
 					},
@@ -429,19 +416,16 @@
 							}
 						],
 						"url": {
-							"raw": "http://localhost:8888/Assessment_setup/api/facilities/1/tags/58",
-							"protocol": "http",
+							"raw": "{{base_url}}/api/facilities/194/tags/1",
 							"host": [
-								"localhost"
+								"{{base_url}}"
 							],
-							"port": "8888",
 							"path": [
-								"Assessment_setup",
 								"api",
 								"facilities",
-								"1",
+								"194",
 								"tags",
-								"58"
+								"1"
 							]
 						}
 					},
@@ -468,14 +452,11 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:8888/Assessment_setup/api/employees",
-							"protocol": "http",
+							"raw": "{{base_url}}/api/employees",
 							"host": [
-								"localhost"
+								"{{base_url}}"
 							],
-							"port": "8888",
 							"path": [
-								"Assessment_setup",
 								"api",
 								"employees"
 							]
@@ -485,48 +466,28 @@
 				},
 				{
 					"name": "Get Employee",
-					"protocolProfileBehavior": {
-						"disableBodyPruning": true
-					},
 					"request": {
 						"auth": {
-							"type": "basic",
-							"basic": [
+							"type": "bearer",
+							"bearer": [
 								{
-									"key": "username",
-									"value": "tetra",
-									"type": "string"
-								},
-								{
-									"key": "password",
-									"value": "joao",
+									"key": "token",
+									"value": "{{token}}",
 									"type": "string"
 								}
 							]
 						},
 						"method": "GET",
 						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
 						"url": {
-							"raw": "http://localhost:8888/Assessment_setup/api/employees/8",
-							"protocol": "http",
+							"raw": "{{base_url}}/api/employees/16",
 							"host": [
-								"localhost"
+								"{{base_url}}"
 							],
-							"port": "8888",
 							"path": [
-								"Assessment_setup",
 								"api",
 								"employees",
-								"8"
+								"16"
 							]
 						}
 					},
@@ -536,25 +497,13 @@
 					"name": "Create Employee",
 					"request": {
 						"auth": {
-							"type": "basic",
-							"basic": [
-								{
-									"key": "username",
-									"value": "tetra",
-									"type": "string"
-								},
-								{
-									"key": "password",
-									"value": "joao",
-									"type": "string"
-								}
-							]
+							"type": "noauth"
 						},
 						"method": "POST",
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"username\" : \"tetra\",\n    \"password\" : \"joao\"\n}",
+							"raw": "{\n    \"username\" : \"joao2\",\n    \"password\" : \"joao\",\n    \"facility_id\" : 1\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -562,14 +511,11 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:8888/Assessment_setup/api/employees",
-							"protocol": "http",
+							"raw": "{{base_url}}/api/employees",
 							"host": [
-								"localhost"
+								"{{base_url}}"
 							],
-							"port": "8888",
 							"path": [
-								"Assessment_setup",
 								"api",
 								"employees"
 							]
@@ -581,16 +527,11 @@
 					"name": "Update Employee",
 					"request": {
 						"auth": {
-							"type": "basic",
-							"basic": [
+							"type": "bearer",
+							"bearer": [
 								{
-									"key": "username",
-									"value": "tetra",
-									"type": "string"
-								},
-								{
-									"key": "password",
-									"value": "joao",
+									"key": "token",
+									"value": "{{token}}",
 									"type": "string"
 								}
 							]
@@ -599,7 +540,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"username\" : \"tetra\",\n    \"password\" : \"joao\"\n}",
+							"raw": "{\n    \"username\" : \"joao3\",\n    \"facility_id\" : 51\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -607,17 +548,14 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:8888/Assessment_setup/api/employees/52",
-							"protocol": "http",
+							"raw": "{{base_url}}/api/employees/19",
 							"host": [
-								"localhost"
+								"{{base_url}}"
 							],
-							"port": "8888",
 							"path": [
-								"Assessment_setup",
 								"api",
 								"employees",
-								"52"
+								"19"
 							]
 						}
 					},
@@ -627,16 +565,11 @@
 					"name": "Delete Employee",
 					"request": {
 						"auth": {
-							"type": "basic",
-							"basic": [
+							"type": "bearer",
+							"bearer": [
 								{
-									"key": "username",
-									"value": "tetra",
-									"type": "string"
-								},
-								{
-									"key": "password",
-									"value": "joao",
+									"key": "token",
+									"value": "{{token}}",
 									"type": "string"
 								}
 							]
@@ -644,17 +577,14 @@
 						"method": "DELETE",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:8888/Assessment_setup/api/employees/52",
-							"protocol": "http",
+							"raw": "{{base_url}}/api/employees/19",
 							"host": [
-								"localhost"
+								"{{base_url}}"
 							],
-							"port": "8888",
 							"path": [
-								"Assessment_setup",
 								"api",
 								"employees",
-								"52"
+								"19"
 							]
 						}
 					},

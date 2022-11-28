@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:8889
--- Generation Time: Nov 18, 2022 at 11:29 AM
+-- Generation Time: Nov 28, 2022 at 05:30 PM
 -- Server version: 5.7.34
 -- PHP Version: 7.4.21
 
@@ -24,10 +24,10 @@ SET time_zone = "+00:00";
 -- --------------------------------------------------------
 
 --
--- Table structure for table `employees`
+-- Table structure for table `employee`
 --
 
-CREATE TABLE `employees` (
+CREATE TABLE `employee` (
   `id` int(11) NOT NULL,
   `username` varchar(255) NOT NULL,
   `password` varchar(255) NOT NULL,
@@ -35,10 +35,10 @@ CREATE TABLE `employees` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
--- Dumping data for table `employees`
+-- Dumping data for table `employee`
 --
 
-INSERT INTO `employees` (`id`, `username`, `password`, `facility_id`) VALUES
+INSERT INTO `employee` (`id`, `username`, `password`, `facility_id`) VALUES
 (16, 'jackass', '$argon2id$v=19$m=65536,t=4,p=1$YXVXZWpLR0tQMy5kNkhjbQ$D/Je9pWb8htiquC4LsVLvfvgFCSBjEJwpczPbvbqHH4', 1),
 (17, 'joao', '$argon2id$v=19$m=65536,t=4,p=1$S0JwV2dGZjRMNFlVcUZOMg$idvwp1hXD0WPT2w+M0B3knaCrgXS0HjLmiDvg0EwGfI', 1);
 
@@ -138,7 +138,25 @@ INSERT INTO `facility` (`id`, `name`, `created_at`, `location_id`) VALUES
 (153, 'ffDV27XZHO', '2022-11-17 14:49:08', 1),
 (154, '0CxGmILY6P', '2022-11-17 15:00:02', 1),
 (155, 'facility155', '2022-11-17 20:30:55', 1),
-(159, 'Last Facility', '2022-11-18 10:59:00', 1);
+(159, 'Last Facility', '2022-11-18 10:59:00', 1),
+(161, 'fac', '2022-11-25 13:53:46', 1),
+(162, 'fac162', '2022-11-25 13:58:48', 1),
+(164, 'fac164', '2022-11-25 13:59:06', 1),
+(167, 'fac165', '2022-11-25 15:42:37', 1),
+(168, 'fac168', '2022-11-25 15:43:49', 1),
+(170, 'fac169', '2022-11-26 14:55:06', 1),
+(171, 'fac171', '2022-11-26 14:57:33', 1),
+(172, 'fac172', '2022-11-26 15:00:12', 1),
+(174, 'fac173', '2022-11-26 15:03:33', 1),
+(175, 'fac175', '2022-11-26 15:07:21', 1),
+(176, 'fac176', '2022-11-26 15:08:04', 1),
+(177, 'fac177', '2022-11-26 15:09:48', 1),
+(178, 'fac178', '2022-11-26 15:10:18', 1),
+(185, 'fac182', '2022-11-26 15:17:33', 2),
+(186, 'fac186', '2022-11-28 10:26:28', 2),
+(193, 'fac190', '2022-11-28 10:34:47', 2),
+(195, 'last facility', '2022-11-28 15:21:09', 2),
+(197, 'last last facility', '2022-11-28 15:21:22', 2);
 
 -- --------------------------------------------------------
 
@@ -147,7 +165,6 @@ INSERT INTO `facility` (`id`, `name`, `created_at`, `location_id`) VALUES
 --
 
 CREATE TABLE `facility_tag` (
-  `id` int(11) NOT NULL,
   `facility_id` int(11) NOT NULL,
   `tag_id` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
@@ -156,94 +173,138 @@ CREATE TABLE `facility_tag` (
 -- Dumping data for table `facility_tag`
 --
 
-INSERT INTO `facility_tag` (`id`, `facility_id`, `tag_id`) VALUES
-(124, 1, 61),
-(125, 1, 62),
-(126, 1, 63),
-(19, 49, 16),
-(18, 49, 32),
-(21, 51, 16),
-(20, 51, 32),
-(82, 51, 45),
-(83, 51, 46),
-(81, 51, 47),
-(23, 52, 16),
-(22, 52, 32),
-(25, 53, 16),
-(24, 53, 32),
-(79, 55, 45),
-(80, 55, 46),
-(78, 55, 47),
-(31, 67, 37),
-(33, 73, 16),
-(32, 73, 37),
-(35, 74, 16),
-(34, 74, 37),
-(37, 76, 16),
-(36, 76, 37),
-(39, 78, 16),
-(38, 78, 37),
-(41, 81, 16),
-(40, 81, 37),
-(142, 83, 2),
-(141, 83, 3),
-(43, 83, 16),
-(42, 83, 37),
-(44, 84, 37),
-(45, 84, 38),
-(46, 85, 37),
-(47, 85, 38),
-(76, 99, 45),
-(77, 99, 46),
-(75, 99, 47),
-(49, 110, 38),
-(50, 111, 38),
-(51, 113, 38),
-(52, 114, 38),
-(53, 116, 38),
-(55, 117, 38),
-(54, 117, 39),
-(57, 119, 38),
-(56, 119, 39),
-(59, 120, 38),
-(58, 120, 40),
-(60, 122, 41),
-(62, 123, 41),
-(84, 127, 43),
-(85, 127, 48),
-(89, 130, 49),
-(88, 130, 50),
-(98, 131, 45),
-(99, 131, 46),
-(96, 131, 49),
-(95, 131, 50),
-(97, 131, 54),
-(101, 133, 49),
-(100, 133, 50),
-(102, 133, 55),
-(103, 133, 56),
-(104, 136, 50),
-(105, 138, 50),
-(106, 140, 50),
-(107, 142, 50),
-(108, 143, 50),
-(109, 144, 50),
-(111, 146, 50),
-(112, 147, 50),
-(113, 148, 50),
-(114, 149, 50),
-(115, 150, 50),
-(116, 151, 50),
-(117, 152, 50),
-(118, 153, 50),
-(127, 154, 1),
-(128, 154, 2),
-(119, 154, 50),
-(134, 155, 2),
-(133, 155, 3),
-(135, 155, 65),
-(144, 159, 2),
-(143, 159, 3);
+INSERT INTO `facility_tag` (`facility_id`, `tag_id`) VALUES
+(1, 61),
+(1, 62),
+(1, 63),
+(49, 16),
+(49, 32),
+(51, 16),
+(51, 32),
+(51, 45),
+(51, 46),
+(51, 47),
+(52, 16),
+(52, 32),
+(53, 16),
+(53, 32),
+(55, 45),
+(55, 46),
+(55, 47),
+(67, 37),
+(73, 16),
+(73, 37),
+(74, 16),
+(74, 37),
+(76, 16),
+(76, 37),
+(78, 16),
+(78, 37),
+(81, 16),
+(81, 37),
+(83, 2),
+(83, 3),
+(83, 16),
+(83, 37),
+(84, 37),
+(84, 38),
+(85, 37),
+(85, 38),
+(99, 45),
+(99, 46),
+(99, 47),
+(110, 38),
+(111, 38),
+(113, 38),
+(114, 38),
+(116, 38),
+(117, 38),
+(117, 39),
+(119, 38),
+(119, 39),
+(120, 38),
+(120, 40),
+(122, 41),
+(123, 41),
+(127, 43),
+(127, 48),
+(130, 49),
+(130, 50),
+(131, 45),
+(131, 46),
+(131, 49),
+(131, 50),
+(131, 54),
+(133, 49),
+(133, 50),
+(133, 55),
+(133, 56),
+(136, 50),
+(138, 50),
+(140, 50),
+(142, 50),
+(143, 50),
+(144, 50),
+(146, 50),
+(147, 50),
+(148, 50),
+(149, 50),
+(150, 50),
+(151, 50),
+(152, 50),
+(153, 50),
+(154, 1),
+(154, 2),
+(154, 50),
+(155, 2),
+(155, 3),
+(155, 65),
+(159, 2),
+(159, 3),
+(161, 2),
+(161, 3),
+(161, 40),
+(162, 2),
+(162, 3),
+(164, 1),
+(164, 2),
+(164, 3),
+(164, 7),
+(164, 11),
+(164, 12),
+(164, 40),
+(164, 50),
+(164, 51),
+(164, 52),
+(164, 55),
+(167, 1),
+(167, 2),
+(168, 1),
+(170, 1),
+(171, 1),
+(172, 1),
+(174, 1),
+(174, 2),
+(174, 3),
+(174, 4),
+(175, 1),
+(175, 2),
+(176, 1),
+(176, 2),
+(177, 1),
+(177, 2),
+(178, 1),
+(178, 2),
+(185, 1),
+(185, 2),
+(186, 1),
+(186, 2),
+(193, 1),
+(193, 2),
+(195, 1),
+(195, 2),
+(197, 1),
+(197, 2);
 
 -- --------------------------------------------------------
 
@@ -291,6 +352,7 @@ INSERT INTO `tag` (`id`, `name`) VALUES
 (47, 'jackdddddass'),
 (37, 'joaotag'),
 (57, 'K48NtSMjqF'),
+(68, 'last tag'),
 (12, 'mmm'),
 (14, 'mmskkm'),
 (13, 'mmsm'),
@@ -345,9 +407,9 @@ INSERT INTO `tag` (`id`, `name`) VALUES
 --
 
 --
--- Indexes for table `employees`
+-- Indexes for table `employee`
 --
-ALTER TABLE `employees`
+ALTER TABLE `employee`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `username` (`username`),
   ADD KEY `employees_ibfk_1` (`facility_id`);
@@ -364,7 +426,7 @@ ALTER TABLE `facility`
 -- Indexes for table `facility_tag`
 --
 ALTER TABLE `facility_tag`
-  ADD PRIMARY KEY (`id`),
+  ADD PRIMARY KEY (`facility_id`,`tag_id`),
   ADD UNIQUE KEY `facility_id_2` (`facility_id`,`tag_id`),
   ADD KEY `facility_id` (`facility_id`),
   ADD KEY `tag_id` (`tag_id`);
@@ -387,22 +449,16 @@ ALTER TABLE `tag`
 --
 
 --
--- AUTO_INCREMENT for table `employees`
+-- AUTO_INCREMENT for table `employee`
 --
-ALTER TABLE `employees`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
+ALTER TABLE `employee`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
 
 --
 -- AUTO_INCREMENT for table `facility`
 --
 ALTER TABLE `facility`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=160;
-
---
--- AUTO_INCREMENT for table `facility_tag`
---
-ALTER TABLE `facility_tag`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=145;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=198;
 
 --
 -- AUTO_INCREMENT for table `location`
@@ -414,17 +470,17 @@ ALTER TABLE `location`
 -- AUTO_INCREMENT for table `tag`
 --
 ALTER TABLE `tag`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=68;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=69;
 
 --
 -- Constraints for dumped tables
 --
 
 --
--- Constraints for table `employees`
+-- Constraints for table `employee`
 --
-ALTER TABLE `employees`
-  ADD CONSTRAINT `employees_ibfk_1` FOREIGN KEY (`facility_id`) REFERENCES `facility` (`id`) ON DELETE CASCADE;
+ALTER TABLE `employee`
+  ADD CONSTRAINT `employee_ibfk_1` FOREIGN KEY (`facility_id`) REFERENCES `facility` (`id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `facility`

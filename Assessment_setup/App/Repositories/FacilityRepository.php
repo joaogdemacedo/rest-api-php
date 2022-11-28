@@ -6,23 +6,20 @@ use App\Entities\Facility;
 use App\Entities\Location;
 use App\Exceptions\FacilityAlreadyExistsException;
 use App\Exceptions\FacilityNotFoundException;
-use App\Exceptions\FacilityTagNotLinkedException;
+use App\Exceptions\FacilityTagAlreadyLinkedException;
 use App\Exceptions\UpdateFailedException;
-use App\Plugins\Db\Connection\Mysql;
 use App\Plugins\Db\Db;
+use App\Utils\PaginationParser;
 use DateTime;
 use PDO;
 
 class FacilityRepository
 {
-
     private Db $db;
 
-
-    public function __construct()
+    public function __construct(Db $db)
     {
-        $connection = new Mysql('127.0.0.1:8889','catering_facilities','root','root');
-        $this->db = new Db($connection);
+        $this->db = $db;
     }
 
 
@@ -61,262 +58,65 @@ class FacilityRepository
     }
 
 
-    public function listFacilities(int $nextCursor, int $limit): array
+    // Get Facilities that satisfies filters obtained
+    // If none filter is get, list all Facilities
+    // Otherwise, look for Facilities with respective patterns of name, tag or city
+    public function listFacilities(PaginationParser $pp): array
     {
-        $sqlListFacilities = '
-            SELECT 
-                f.id, 
-                f.name, 
-                f.created_at, 
-                l.id AS location_id, 
-                l.city AS location_city 
-            FROM facility AS f 
-            INNER JOIN location AS l ON l.id=f.location_id
-            AND f.id>= :nextCursor
-            ORDER BY f.id
-            LIMIT :limit';
+        $nextCursor = $pp->getNextCursor();
+        $limit = $pp->getLimit();
+        $patternFacilityName = '%' . $pp->getFacilityName() . '%';
+        $patternTagName = '%' . $pp->getTagName() . '%';
+        $patternCity = '%' . $pp->getLocationCity() . '%';
 
-        $statement = $this->db->prepareStatement($sqlListFacilities);
-        $statement->bindParam(':limit', $limit, PDO::PARAM_INT);
-        $statement->bindParam(':nextCursor', $nextCursor, PDO::PARAM_INT);
-        $statement->execute();
-        $results = $statement->fetchAll();
-
-        if(empty($results)){
-            throw new FacilityNotFoundException();
-        }
-        return $this->parserFacilitiesPagination($results, $limit);
-    }
-
-
-    public function getFacilityByName(string $facilityName, int $nextCursor, int $limit): array
-    {
-        $pattern = '%' . $facilityName . '%';
-        $sqlGetFacility = '
-            SELECT 
-                f.*,
+        $sqlQuery = '
+            SELECT DISTINCT
+                f.id,
+                f.name,
+                f.created_at,
+                l.id AS location_id,
                 l.city AS location_city
             FROM facility AS f
             INNER JOIN location AS l ON l.id = f.location_id
-            WHERE f.name LIKE :facilityName
+            INNER JOIN facility_tag AS ft ON ft.facility_id = f.id
+            INNER JOIN tag AS t ON t.id=ft.tag_id ';
+
+        $filters = [];
+        $whereFlag = false;
+        if (!empty($pp->getFacilityName())){
+            $sqlQuery .= ($whereFlag ? 'AND ' : 'WHERE ' ) . 'f.name LIKE :facilityName ';
+            $whereFlag = true;
+            $filters[] = array(':facilityName', $patternFacilityName);
+        }
+        if (!empty($pp->getTagName())){
+            $sqlQuery .= ($whereFlag ? 'AND ' : 'WHERE ') . 't.name LIKE :tagName ';
+            $whereFlag = true;
+            $filters[] = [':tagName', $patternTagName];
+        }
+        if (!empty($pp->getLocationCity())){
+            $sqlQuery .= ($whereFlag ? 'AND ' : 'WHERE ') . 'l.city LIKE :city ';
+            $whereFlag = true;
+            $filters[] = [':city', $patternCity];
+        }
+        $sqlQuery .= '
             AND f.id>= :nextCursor
-            ORDER BY f.id 
-            LIMIT :limit';
-
-        $statement = $this->db->prepareStatement($sqlGetFacility);
-        $statement->bindParam(':facilityName', $pattern, PDO::PARAM_STR);
-        $statement->bindParam(':limit', $limit, PDO::PARAM_INT);
-        $statement->bindParam(':nextCursor', $nextCursor, PDO::PARAM_INT);
-        $statement->execute();
-        $results = $statement->fetchAll();
-        if(empty($results)){
-            throw new FacilityNotFoundException();
-        }
-        return $this->parserFacilitiesPagination($results, $limit);
-    }
-
-
-    public function getFacilitiesByTagName(string $tagName, int $nextCursor, int $limit): array
-    {
-        $pattern = '%' . $tagName . '%';
-        $sqlFacilitiesByTagName = '
-            SELECT DISTINCT 
-                f.id,
-                f.name,
-                f.created_at,
-                l.id AS location_id,
-                l.city AS location_city
-            FROM facility AS f 
-            INNER JOIN facility_tag AS ft ON ft.facility_id = f.id
-            INNER JOIN tag AS t ON t.id=ft.tag_id 
-            INNER JOIN location AS l ON l.id=f.location_id
-            WHERE t.name LIKE :tagName
-            AND f.id>=:nextCursor
-            ORDER BY f.id 
-            LIMIT :limit';
-
-        $statement = $this->db->prepareStatement($sqlFacilitiesByTagName);
-        $statement->bindParam(':tagName', $pattern, PDO::PARAM_STR);
-        $statement->bindParam(':limit', $limit, PDO::PARAM_INT);
-        $statement->bindParam(':nextCursor', $nextCursor, PDO::PARAM_INT);
-        $statement->execute();
-        $results = $statement->fetchAll();
-        if(empty($results)){
-            throw new FacilityNotFoundException();
-        }
-        return $this->parserFacilitiesPagination($results, $limit);
-    }
-
-
-    public function getFacilitiesByCity(string $city, int $nextCursor, int $limit): array
-    {
-
-        $pattern = '%' . $city . '%';
-        $sqlFacilitiesByCity = '
-            SELECT 
-                f.id, 
-                f.name, 
-                f.created_at, 
-                f.location_id,
-                l.city AS location_city
-            FROM facility AS f
-            INNER JOIN location AS l ON f.location_id = l.id
-            WHERE l.city LIKE :city
-            AND f.id>=:nextCursor
-            ORDER BY f.id 
-            LIMIT :limit';
-
-        $statement = $this->db->prepareStatement($sqlFacilitiesByCity);
-        $statement->bindParam(':city', $pattern, PDO::PARAM_STR);
-        $statement->bindParam(':limit', $limit, PDO::PARAM_INT);
-        $statement->bindParam(':nextCursor', $nextCursor, PDO::PARAM_INT);
-        $statement->execute();
-        $results = $statement->fetchAll();
-        if(empty($results)){
-            throw new FacilityNotFoundException();
-        }
-        return $this->parserFacilitiesPagination($results, $limit);
-    }
-
-
-    public function getFacilitiesByNameTagAndCity(string $facilityName, string $tagName, string $city, int $nextCursor, int $limit): array
-    {
-        $patternFacilityName = '%' . $facilityName . '%';
-        $patternTagName = '%' . $tagName . '%';
-        $patternCity = '%' . $city . '%';
-        $sqlFacilitiesByNameTagAndLocation = '
-            SELECT DISTINCT 
-                f.id,
-                f.name,
-                f.created_at,
-                l.id AS location_id,
-                l.city AS location_city
-            FROM facility AS f 
-            INNER JOIN facility_tag AS ft ON ft.facility_id = f.id
-            INNER JOIN tag AS t ON t.id=ft.tag_id 
-            INNER JOIN location AS l ON l.id=f.location_id
-            WHERE t.name LIKE :tagName
-            AND l.city LIKE :city
-            AND f.name LIKE :facilityName
-            AND f.id >= :nextCursor
             ORDER BY f.id
             LIMIT :limit';
+        $statement = $this->db->prepareStatement($sqlQuery);
 
-        $statement = $this->db->prepareStatement($sqlFacilitiesByNameTagAndLocation);
-        $statement->bindParam(':facilityName', $patternFacilityName, PDO::PARAM_STR);
-        $statement->bindParam(':tagName', $patternTagName, PDO::PARAM_STR);
-        $statement->bindParam(':city', $patternCity, PDO::PARAM_STR);
+        foreach ($filters as $filter){
+            $statement->bindParam( $filter[0],$filter[1], PDO::PARAM_STR);
+        }
+
         $statement->bindParam(':limit', $limit, PDO::PARAM_INT);
         $statement->bindParam(':nextCursor', $nextCursor, PDO::PARAM_INT);
         $statement->execute();
         $results = $statement->fetchAll();
+
         if(empty($results)){
             throw new FacilityNotFoundException();
         }
-        return $this->parserFacilitiesPagination($results, $limit);
-    }
-
-
-    public function getFacilitiesByNameAndTag(string $facilityName, string $tagName, int $nextCursor, int $limit): array
-    {
-        $patternFacilityName = '%' . $facilityName . '%';
-        $patternTagName = '%' . $tagName . '%';
-        $sqlFacilitiesByNameTagAndLocation = '
-            SELECT DISTINCT 
-                f.id,
-                f.name,
-                f.created_at,
-                l.id AS location_id,
-                l.city AS location_city
-            FROM facility AS f 
-            INNER JOIN facility_tag AS ft ON ft.facility_id = f.id
-            INNER JOIN tag AS t ON t.id=ft.tag_id 
-            INNER JOIN location AS l ON l.id=f.location_id
-            WHERE t.name LIKE :tagName
-            AND f.name LIKE :facilityName
-            AND f.id >= :nextCursor
-            ORDER BY f.id
-            LIMIT :limit';
-
-        $statement = $this->db->prepareStatement($sqlFacilitiesByNameTagAndLocation);
-        $statement->bindParam(':facilityName', $patternFacilityName, PDO::PARAM_STR);
-        $statement->bindParam(':tagName', $patternTagName, PDO::PARAM_STR);
-        $statement->bindParam(':limit', $limit, PDO::PARAM_INT);
-        $statement->bindParam(':nextCursor', $nextCursor, PDO::PARAM_INT);
-        $statement->execute();
-        $results = $statement->fetchAll();
-        if(empty($results)){
-            throw new FacilityNotFoundException();
-        }
-        return $this->parserFacilitiesPagination($results, $limit);
-    }
-
-
-    public function getFacilitiesByNameAndCity(string $facilityName, string $city, int $nextCursor, int $limit): array
-    {
-        $patternFacilityName = '%' . $facilityName . '%';
-        $patternCity = '%' . $city . '%';
-        $sqlFacilitiesByNameAndLocation = '
-            SELECT 
-                f.id, 
-                f.name, 
-                f.created_at, 
-                f.location_id,
-                l.city AS location_city
-            FROM facility AS f
-            INNER JOIN location AS l ON f.location_id = l.id
-            WHERE l.city LIKE :city
-            AND f.name LIKE :facilityName
-            AND f.id>=:nextCursor
-            ORDER BY f.id 
-            LIMIT :limit';
-
-        $statement = $this->db->prepareStatement($sqlFacilitiesByNameAndLocation);
-        $statement->bindParam(':facilityName', $patternFacilityName, PDO::PARAM_STR);
-        $statement->bindParam(':city', $patternCity, PDO::PARAM_STR);
-        $statement->bindParam(':limit', $limit, PDO::PARAM_INT);
-        $statement->bindParam(':nextCursor', $nextCursor, PDO::PARAM_INT);
-        $statement->execute();
-        $results = $statement->fetchAll();
-        if(empty($results)){
-            throw new FacilityNotFoundException();
-        }
-        return $this->parserFacilitiesPagination($results, $limit);
-    }
-
-
-    public function getFacilitiesByTagAndCity(string $tagName, string $city, int $nextCursor, int $limit): array
-    {
-        $patternTagName = '%' . $tagName . '%';
-        $patternCity = '%' . $city . '%';
-        $sqlFacilitiesByNameTagAndLocation = '
-            SELECT DISTINCT 
-                f.id,
-                f.name,
-                f.created_at,
-                l.id AS location_id,
-                l.city AS location_city
-            FROM facility AS f 
-            INNER JOIN facility_tag AS ft ON ft.facility_id = f.id
-            INNER JOIN tag AS t ON t.id=ft.tag_id 
-            INNER JOIN location AS l ON l.id=f.location_id
-            WHERE t.name LIKE :tagName
-            AND l.city LIKE :city
-            AND f.id >= :nextCursor
-            ORDER BY f.id
-            LIMIT :limit';
-
-        $statement = $this->db->prepareStatement($sqlFacilitiesByNameTagAndLocation);
-        $statement->bindParam(':tagName', $patternTagName, PDO::PARAM_STR);
-        $statement->bindParam(':city', $patternCity, PDO::PARAM_STR);
-        $statement->bindParam(':limit', $limit, PDO::PARAM_INT);
-        $statement->bindParam(':nextCursor', $nextCursor, PDO::PARAM_INT);
-        $statement->execute();
-        $results = $statement->fetchAll();
-        if(empty($results)){
-            throw new FacilityNotFoundException();
-        }
-        return $this->parserFacilitiesPagination($results, $limit);
+        return $results;
     }
 
 
@@ -344,6 +144,8 @@ class FacilityRepository
     }
 
 
+    // Link Facility with Tag
+    // e.g., insert an entry in junction table facility_tag with Facility and Tag IDs
     public function createFacilityTagLink(int $facilityId, int $tagId): int
     {
         $sqlLinkTag = '
@@ -351,10 +153,16 @@ class FacilityRepository
             VALUES (:facilityId, :tagId);';
 
         $this->db->executeQuery($sqlLinkTag,['facilityId'=> $facilityId, 'tagId' => $tagId]);
-        return $this->db->getLastInsertedId();
+        $facilityLinkedRow = $this->db->getStatement()->rowCount();
+        if ($facilityLinkedRow==0){
+            throw new FacilityTagAlreadyLinkedException();
+        }
+        return $facilityLinkedRow;
     }
 
 
+    // Remove link of a Facility with a Tag
+    // e.g., delete the row in junction table facility_tag with Facility and Tag IDs
     public function deleteFacilityTagLink(int $facilityId, int $tagId)
     {
         $sqlDeleteLink = '
@@ -373,7 +181,7 @@ class FacilityRepository
         $this->db->executeQuery($sqlGetFacilityTag, ['facilityId' => $facilityId, 'tagId' => $tagId]);
         $result = $this->db->getStatement()->fetch();
         if (empty($result)){
-            throw new FacilityTagNotLinkedException();
+            throw new FacilityTagAlreadyLinkedException();
         }
         return $result;
     }
@@ -405,42 +213,5 @@ class FacilityRepository
 
         $this->db->executeQuery($sqlDeleteFacility, ['facilityId' => $facilityId]);
     }
-
-    // Function created to delete repetitive lines
-    public function parserFacilitiesPagination(array $results, int $limit): array
-    {
-
-        $numberOfRows = 0;
-        $facilities = [];
-        foreach ($results as $result){
-            $location = new Location(
-                intval($result['location_id']),
-                $result['location_city'],
-                '',
-                '',
-                '' ,
-                ''
-            );
-            $facilities[]= new Facility(
-                intval($result['id']),
-                $result['name'],
-                new DateTime($result['created_at']),
-                $location,
-                []
-            );
-            $numberOfRows++;
-        }
-        if ($numberOfRows<$limit){
-            $nextCursor = null;
-        } else {
-            $lastFacility = array_pop($facilities);
-            $nextCursor = $lastFacility->getId();
-        }
-        return [
-            "facilities" => $facilities,
-            "nextCursor" => $nextCursor
-        ];
-    }
-
 
 }

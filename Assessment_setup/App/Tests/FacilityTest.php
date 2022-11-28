@@ -6,6 +6,7 @@ use App\Plugins\Http\Exceptions\Conflict;
 use App\Plugins\Http\Exceptions\NotFound;
 use App\Repositories\TagRepository;
 use App\Services\FacilityService;
+use App\Utils\Utils;
 use PHPUnit\Framework\TestCase;
 
 class FacilityTest extends TestCase
@@ -30,6 +31,7 @@ class FacilityTest extends TestCase
      */
     public function testShouldCreateFacilityWithSuccess()
     {
+        $dbConnection = Utils::getDbConnection();
         // Given
         $requestPayload = [
             'name' => $this->getRandomName(),
@@ -42,7 +44,7 @@ class FacilityTest extends TestCase
         ];
 
         // When
-        $facilityService = new FacilityService();
+        $facilityService = new FacilityService($dbConnection);
         $facilityCreated = $facilityService->createFacility($requestPayload);
 
         // Then
@@ -61,6 +63,7 @@ class FacilityTest extends TestCase
      */
     public function testShouldUpdateFacilityWithSuccess()
     {
+        $dbConnection = Utils::getDbConnection();
         // Given
         $id = 1;
         $requestPayload = [
@@ -74,8 +77,8 @@ class FacilityTest extends TestCase
         ];
 
         // When
-        $facilityService = new FacilityService();
-        $tagRepository = new TagRepository();
+        $facilityService = new FacilityService($dbConnection);
+        $tagRepository = new TagRepository($dbConnection);
         $facilityService->updateFacility($id, $requestPayload);
 
         // Then

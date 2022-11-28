@@ -2,40 +2,34 @@
 
 namespace App\Controllers;
 
-use App\Plugins\Http\Exceptions\BadRequest;
-use App\Plugins\Http\Exceptions\Conflict;
-use App\Plugins\Http\Exceptions\NotFound;
-use App\Plugins\Http\Exceptions\Unauthorized;
 use App\Plugins\Http\Response\Created;
 use App\Plugins\Http\Response\Ok;
 use App\Services\AuthenticationService;
 use App\Services\EmployeeService;
+use App\Utils\Utils;
 
 class EmployeeController extends AuthenticationController
 {
     private EmployeeService $employeeService;
     private AuthenticationService $authenticationService;
 
-
-    public function __construct(){
-        $this->employeeService = new EmployeeService();
-        $this->authenticationService = new AuthenticationService();
+    public function __construct()
+    {
+        $dbConnection = Utils::getDbConnection();
+        $this->employeeService = new EmployeeService($dbConnection);
+        $this->authenticationService = new AuthenticationService($dbConnection);
     }
-
 
 
     public function createEmployee()
     {
-        $getBody = file_get_contents('php://input');
-        $decodeJson = json_decode($getBody, true);
-
-        $employee = $this->employeeService->createEmployee($decodeJson);
+        $employee = $this->employeeService->createEmployee(Utils::getDecodeJson());
         return (new Created($employee))->send();
     }
 
 
-
-    public function listEmployees(){
+    public function listEmployees()
+    {
         $employeeId = $this->authenticationService->validateToken();
 
         $employees = $this->employeeService->listEmployees();
@@ -43,8 +37,8 @@ class EmployeeController extends AuthenticationController
     }
 
 
-
-    public function getEmployee(int $id){
+    public function getEmployee(int $id)
+    {
         $employeeId = $this->authenticationService->validateToken();
 
         $employee = $this->employeeService->getEmployee($id);
@@ -52,20 +46,17 @@ class EmployeeController extends AuthenticationController
     }
 
 
-
-    public function updateEmployee(int $id){
+    public function updateEmployee(int $id)
+    {
         $employeeId = $this->authenticationService->validateToken();
 
-        $getBody = file_get_contents('php://input');
-        $decodeJson = json_decode($getBody, true);
-
-        $employee = $this->employeeService->updateEmployee($id, $decodeJson);
+        $employee = $this->employeeService->updateEmployee($id, Utils::getDecodeJson());
         return (new Ok($employee))->send();
     }
 
 
-
-    public function deleteEmployee(int $id){
+    public function deleteEmployee(int $id)
+    {
         $employeeId = $this->authenticationService->validateToken();
 
         $employee = $this->employeeService->deleteEmployee($id);

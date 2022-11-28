@@ -2,14 +2,11 @@
 
 namespace App\Controllers;
 
-use App\Plugins\Http\Exceptions\BadRequest;
-use App\Plugins\Http\Exceptions\Conflict;
-use App\Plugins\Http\Exceptions\NotFound;
-use App\Plugins\Http\Exceptions\Unauthorized;
 use App\Plugins\Http\Response\Created;
 use App\Plugins\Http\Response\Ok;
 use App\Services\AuthenticationService;
 use App\Services\FacilityService;
+use App\Utils\Utils;
 
 class FacilityController extends AuthenticationController
 {
@@ -17,9 +14,11 @@ class FacilityController extends AuthenticationController
     private AuthenticationService $authenticationService;
 
 
-    public function __construct(){
-        $this->facilityService = new FacilityService();
-        $this->authenticationService = new AuthenticationService();
+    public function __construct()
+    {
+        $dbConnection = Utils::getDbConnection();
+        $this->facilityService = new FacilityService($dbConnection);
+        $this->authenticationService = new AuthenticationService($dbConnection);
     }
 
 
@@ -30,30 +29,20 @@ class FacilityController extends AuthenticationController
     }
 
 
-
     public function listFacilities()
     {
         $employeeId = $this->authenticationService->validateToken();
 
-        if (empty($_GET['facilityname']) && empty($_GET['tagname']) && empty($_GET['locationcity'])) {
-            $facilities = $this->facilityService->listFacilities();
-        } else {
-            $facilities = $this->facilityService->paginationParser();
-        }
+        $facilities = $this->facilityService->listFacilities();
         return (new Ok($facilities))->send();
     }
-
 
 
     public function createFacility()
     {
         $employeeId = $this->authenticationService->validateToken();
 
-        $getBody = file_get_contents('php://input');
-        $decodeJson = json_decode($getBody, true);
-
-        $facilityCreated = $this->facilityService->createFacility($decodeJson);
-
+        $facilityCreated = $this->facilityService->createFacility(Utils::getDecodeJson());
         return (new Created($facilityCreated))->send();
     }
 
@@ -62,11 +51,7 @@ class FacilityController extends AuthenticationController
     {
         $employeeId = $this->authenticationService->validateToken();
 
-        $getBody = file_get_contents('php://input');
-        $decodeJson = json_decode($getBody, true);
-
-        $facilityUpdated = $this->facilityService->updateFacility($id, $decodeJson);
-
+        $facilityUpdated = $this->facilityService->updateFacility($id, Utils::getDecodeJson());
         return (new Ok($facilityUpdated))->send();
     }
 
@@ -76,7 +61,6 @@ class FacilityController extends AuthenticationController
         $employeeId = $this->authenticationService->validateToken();
 
         $facilityDeleted = $this->facilityService->deleteFacility($id);
-
         return (new Ok($facilityDeleted))->send();
     }
 
@@ -85,10 +69,7 @@ class FacilityController extends AuthenticationController
     {
         $employeeId = $this->authenticationService->validateToken();
 
-        $getBody = file_get_contents('php://input');
-        $decodeJson = json_decode($getBody, true);
-
-        $facility = $this->facilityService->addTags($id, $decodeJson);
+        $facility = $this->facilityService->addTags($id, Utils::getDecodeJson());
         return (new Ok($facility))->send();
     }
 

@@ -5,26 +5,23 @@ namespace App\Controllers;
 
 
 use App\Plugins\Di\Injectable;
-use App\Plugins\Http\Exceptions\NotFound;
-use App\Plugins\Http\Exceptions\Unauthorized;
 use App\Plugins\Http\Response\Ok;
 use App\Services\AuthenticationService;
+use App\Utils\Utils;
 
 class AuthenticationController extends Injectable
 {
     private AuthenticationService $authenticationService;
 
     public function __construct(){
-        $this->authenticationService = new AuthenticationService();
+        $dbConnection = Utils::getDbConnection();
+        $this->authenticationService = new AuthenticationService($dbConnection);
     }
 
 
     public function authentication()
     {
-        $getBody = file_get_contents('php://input');
-        $decodeJson = json_decode($getBody, true);
-
-        $token = $this->authenticationService->authenticate($decodeJson);
+        $token = $this->authenticationService->authenticate(Utils::getDecodeJson());
         return (new Ok(['token' => $token]))->send();
     }
 
