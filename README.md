@@ -16,7 +16,6 @@ This API has `CRUD` implemented and other functionalities such as `search criter
 - `Utils`: This folder contains a class named `PaginationParser`to get Query Parameters in order to allow searching with simultaneous filters and pagination. 
 - `Tests`: Integration Tests to validate the API codebase.
 
-
 #### Other Files
 
 - `HourLog.pdf` : File containg how much time I needed to build this API and more details about the development.
@@ -31,7 +30,7 @@ This API has `CRUD` implemented and other functionalities such as `search criter
 
   - `facility`: store each Facility.
   - `location`: store each Location of each Facility.
-  - `employees`: store each Employee of Facilities 
+  - `employee`: store each Employee of Facilities 
   - `tag`: store all the Tags
   - `facility_tag` (M:N table): table to store the information about all Tags of each Facility.
 - `CRUD` implemented for both _Facilities_ and _Employees_.
@@ -45,7 +44,6 @@ This API has `CRUD` implemented and other functionalities such as `search criter
 - `Json Web Token Authentication` added with _Hashed Password_ saved in database.
 - `Integration Tests` using _PHPUnit_.
 
-
 ### Comments
 
 - When deleting a facility, database has `ON DELETE CASCADE` on _facility_id_ column in _facility_tag_ and _employees_ tables. Thus, it is not needed to perform a transaction to delete all relationships with this facility.
@@ -54,7 +52,12 @@ This API has `CRUD` implemented and other functionalities such as `search criter
 - Passwords of created _Employees_ are equals to their _username_.
 - The `App secret key` should be placed as an environment variable due to security issues.
 
-### Future work
+### Online Resources
+
+- `JWT implementation`: https://www.sitepoint.com/php-authorization-jwt-json-web-tokens/ 
+- `Cursor Pagination`: https://slack.engineering/evolving-api-pagination-at-slack/
+
+### Future Work
 
 - Implement User roles to control the access to certain requests.
 - Have the ability to change and restore passwords.
