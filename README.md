@@ -20,7 +20,7 @@ This API has `CRUD` implemented and other functionalities such as `search criter
 
 - `HourLog.pdf` : File containg how much time I needed to build this API and more details about the development.
 - `Database.sql` : My database dump created in phpMyAdmin
-- `PostmanCollection/`: API collection and environment.
+- `Postman_files/`: API collection and environment.
 
 ### User Storys
 
