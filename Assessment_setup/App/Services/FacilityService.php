@@ -58,25 +58,34 @@ class FacilityService
         /** @var int $locationid */
         $locationId = $requestPayload['location_id'];
 
+        $tagNames = $requestPayload['tag_names'];
+
         $this->db->beginTransaction();
         try {
             $location = $this->locationRepository->getLocation($locationId);
             $facility = $this->facilityRepository->createFacility($facilityName,$location);
-            $facilityWithTags = $this->addTags($facility->getId(), $requestPayload);
+
+            foreach ($tagNames as $tagName){
+                try {
+                    $tag = $this->tagRepository->getTagByName($tagName['name']);
+                    $this->facilityRepository->createFacilityTagLink($facility->getId(), $tag->getId());
+                } catch (TagNotFoundException $exception) {
+                    $this->db->rollBack();
+                    throw new NotFound(['message' => 'Unable to find Tag or Tags.']);
+                } catch (FacilityTagAlreadyLinkedException $exception){
+                    $this->db->rollBack();
+                    throw new Conflict(['message' => 'Tag already linked to this facility.']);
+                }
+            }
             $this->db->commit();
-            return $facilityWithTags;
+            $facility->setTags($this->tagRepository->getTagsByFacilityId($facility->getId()));
+            return $facility;
         } catch (LocationNotFoundException $exception){
             $this->db->rollBack();
             throw new NotFound(['message' => 'Unable to find this Location.']);
         } catch (FacilityAlreadyExistsException $exception){
             $this->db->rollBack();
             throw new Conflict(['message' => 'Facility already exists.']);
-        } catch (Conflict $exception) {
-            $this->db->rollBack();
-            throw new Conflict(['message' => 'Unable to link same Tag multiple times.']);
-        } catch (NotFound $exception){
-            $this->db->rollBack();
-            throw new NotFound(['message' => 'Unable to find Tag or Tags.']);
         }
 
     }
@@ -84,8 +93,10 @@ class FacilityService
 
     // Add existing Tags to a Facility
     // e.g., add an entry to facility_tag table with Facility and Tag ids
+    // Transactions needed in order to add facilities just in case all Tags can be added
     public function addTags(int $id, array $requestPayload): Facility
     {
+        $this->db->beginTransaction();
         $tagNames = $requestPayload['tag_names'];
         try {
             $facility = $this->facilityRepository->getFacility($id);
@@ -97,11 +108,14 @@ class FacilityService
                 $tag = $this->tagRepository->getTagByName($tagName['name']);
                 $this->facilityRepository->createFacilityTagLink($id, $tag->getId());
             } catch (TagNotFoundException $exception) {
+                $this->db->rollBack();
                 throw new NotFound(['message' => 'Unable to find Tag or Tags.']);
             } catch (FacilityTagAlreadyLinkedException $exception){
+                $this->db->rollBack();
                 throw new Conflict(['message' => 'Tag already linked to this facility.']);
             }
         }
+        $this->db->commit();
         $facility->setTags($this->tagRepository->getTagsByFacilityId($id));
         return $facility;
     }
