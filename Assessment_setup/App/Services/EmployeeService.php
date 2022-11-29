@@ -6,7 +6,6 @@ use App\Entities\Employee;
 use App\Exceptions\EmployeeAlreadyExistsException;
 use App\Exceptions\EmployeeNotFoundException;
 use App\Exceptions\FacilityNotFoundException;
-use App\Plugins\Db\Connection\Mysql;
 use App\Plugins\Db\Db;
 use App\Plugins\Http\Exceptions\Conflict;
 use App\Plugins\Http\Exceptions\NotFound;

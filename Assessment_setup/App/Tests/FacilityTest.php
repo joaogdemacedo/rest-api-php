@@ -38,7 +38,7 @@ class FacilityTest extends TestCase
             'location_id' => 1,
             'tag_names' => [
                 [
-                'name' => 'tag50'
+                'name' => 'tag1'
                 ]
             ]
         ];
@@ -68,33 +68,19 @@ class FacilityTest extends TestCase
         $id = 1;
         $requestPayload = [
             'name' => $this->getRandomName(),
-            'location_id' => 1,
-            'tag_names' => [
-                [
-                    'name' => $this->getRandomName()
-                ]
-            ]
+            'location_id' => '1'
         ];
 
         // When
         $facilityService = new FacilityService($dbConnection);
-        $tagRepository = new TagRepository($dbConnection);
         $facilityService->updateFacility($id, $requestPayload);
 
         // Then
-        $results = $tagRepository->getTagsByFacilityId($id);
-        $tagName='';
-        foreach ($results as $result){ // Check if Tag inserted was linked with this Facility
-            if ($result->getName() == $requestPayload['tag_names'][0]['name'])
-                $tagName = $result->getName();
-        }
         $getFacility = $facilityService->getFacility($id);
-        $facilityTag = $tagRepository->getTagByName($requestPayload['tag_names'][0]['name']);
 
         self::assertNotNull($getFacility);
         self::assertSame($requestPayload['name'],$getFacility->getName());
-        self::assertSame($requestPayload['tag_names'][0]['name'],$facilityTag->getName());
-        self::assertSame($requestPayload['tag_names'][0]['name'], $tagName);
+        self::assertSame(intval($requestPayload['location_id']), $getFacility->getLocation()->getId());
     }
 
 

@@ -5,7 +5,6 @@ namespace App\Services;
 use App\Entities\Tag;
 use App\Exceptions\TagAlreadyExistsException;
 use App\Exceptions\TagNotFoundException;
-use App\Plugins\Db\Connection\Mysql;
 use App\Plugins\Db\Db;
 use App\Plugins\Http\Exceptions\Conflict;
 use App\Plugins\Http\Exceptions\NotFound;

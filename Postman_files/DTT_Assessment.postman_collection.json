@@ -100,7 +100,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"name\": \"last tag\"\n}",
+							"raw": "{\n    \"name\": \"tag69\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -141,7 +141,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{base_url}}/api/facilities/",
+							"raw": "{{base_url}}/api/facilities/?facilityname=name",
 							"host": [
 								"{{base_url}}"
 							],
@@ -153,7 +153,7 @@
 							"query": [
 								{
 									"key": "tagname",
-									"value": "tag",
+									"value": "tagddd",
 									"description": "Partial match of Tag",
 									"disabled": true
 								},
@@ -166,8 +166,7 @@
 								{
 									"key": "facilityname",
 									"value": "name",
-									"description": "Partial match of Facility name",
-									"disabled": true
+									"description": "Partial match of Facility name"
 								},
 								{
 									"key": "nextcursor",
@@ -214,14 +213,14 @@
 							}
 						],
 						"url": {
-							"raw": "{{base_url}}/api/facilities/159",
+							"raw": "{{base_url}}/api/facilities/197",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
 								"api",
 								"facilities",
-								"159"
+								"197"
 							]
 						}
 					},
@@ -250,7 +249,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"name\": \"last facility\",\n    \"location_id\": \"2\",\n    \"tag_names\": [\n                {\n                    \"name\": \"tag1\"\n                },\n                {\n                    \"name\": \"tag2\"\n                }\n            ]\n}",
+							"raw": "{\n    \"name\": \"200 facility\",\n    \"location_id\": \"3\",\n    \"tag_names\": [\n                {\n                    \"name\": \"tag1\"\n                },\n                {\n                    \"name\": \"tag2\"\n                }\n            ]\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -293,7 +292,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"tag_names\": [\n                {\n                    \"name\": \"tag3\"\n                },\n                {\n                    \"name\": \"tagAI\"\n                }\n            ]\n}",
+							"raw": "{\n    \"tag_names\": [\n                {\n                    \"name\": \"tag3\"\n                },\n                {\n                    \"name\": \"tag1\"\n                }\n            ]\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -301,14 +300,14 @@
 							}
 						},
 						"url": {
-							"raw": "{{base_url}}/api/facilities/194/tags",
+							"raw": "{{base_url}}/api/facilities/197/tags",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
 								"api",
 								"facilities",
-								"194",
+								"197",
 								"tags"
 							]
 						}
@@ -338,7 +337,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"name\": \"facility1\",\n    \"location_id\":2\n}",
+							"raw": "{\n    \"name\": \"fac193\",\n    \"location_id\":\"2\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -346,14 +345,14 @@
 							}
 						},
 						"url": {
-							"raw": "{{base_url}}/api/facilities/1",
+							"raw": "{{base_url}}/api/facilities/193",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
 								"api",
 								"facilities",
-								"1"
+								"193"
 							]
 						}
 					},
@@ -381,14 +380,14 @@
 							}
 						],
 						"url": {
-							"raw": "{{base_url}}/api/facilities/194",
+							"raw": "{{base_url}}/api/facilities/200",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
 								"api",
 								"facilities",
-								"194"
+								"200"
 							]
 						}
 					},
@@ -416,16 +415,16 @@
 							}
 						],
 						"url": {
-							"raw": "{{base_url}}/api/facilities/194/tags/1",
+							"raw": "{{base_url}}/api/facilities/195/tags/2",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
 								"api",
 								"facilities",
-								"194",
+								"195",
 								"tags",
-								"1"
+								"2"
 							]
 						}
 					},

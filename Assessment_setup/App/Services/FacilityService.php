@@ -10,7 +10,6 @@ use App\Exceptions\FacilityTagAlreadyLinkedException;
 use App\Exceptions\LocationNotFoundException;
 use App\Exceptions\TagNotFoundException;
 use App\Exceptions\UpdateFailedException;
-use App\Plugins\Db\Connection\Mysql;
 use App\Plugins\Db\Db;
 use App\Plugins\Http\Exceptions\Conflict;
 use App\Plugins\Http\Exceptions\NotFound;
@@ -126,9 +125,9 @@ class FacilityService
         } catch (FacilityNotFoundException $exception){
             throw new NotFound(['message' => 'Unable to find this Facility.']);
         } catch (UpdateFailedException $exception){
-            throw new Conflict(['message' => 'Update failed.']);
+            throw new Conflict(['message' => 'Facility name and Location already exists.']);
         } catch (LocationNotFoundException $exception) {
-            throw new Conflict(['message' => 'Unable to find this Location.']);
+            throw new NotFound(['message' => 'Unable to find this Location.']);
         }
         $facility = $this->facilityRepository->getFacility($facilityId);
         $facility->setLocation(new Location($locationId,$location->getCity(),'','','',''));

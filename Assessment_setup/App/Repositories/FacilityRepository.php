@@ -60,7 +60,7 @@ class FacilityRepository
 
     // Get Facilities that satisfies filters obtained
     // If none filter is get, list all Facilities
-    // Otherwise, look for Facilities with respective patterns of name, tag or city
+    // Otherwise, look for Facilities with respective patterns of name, tag and/or city
     public function listFacilities(PaginationParser $pp): array
     {
         $nextCursor = $pp->getNextCursor();
